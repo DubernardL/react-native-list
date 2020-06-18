@@ -1,30 +1,27 @@
-import React from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { StyleSheet, Text, View, TextInput, FlatList, Button } from 'react-native'
 import AsyncStorage from '@react-native-community/async-storage'
-import { addElement } from '../actions/index'
+import { addElement, deleteAll } from '../actions/index'
 
-class Home extends React.Component {
+class Home extends Component {
 
   constructor(props) {
     super(props)
     this.state = {
-      input_item: "",
-      items: []
+      input_item: '',
+      items_loaded: []
     }
   }
 
-  componentDidMount() {
-    this.getData()
-    console.log('COMPONENT DID MOUNT')
-  }
-
-  async getData() {
+  async componentDidMount() {
     try {
       const jsonValue = await AsyncStorage.getItem('items')
-      this.setState({
-        items: JSON.parse(jsonValue)
-      })
+      if(jsonValue != undefined) {
+        this.setState({
+          items_loaded: JSON.parse(jsonValue)
+        })
+      }
     } catch(e) {
       console.log(e)
     }
@@ -36,32 +33,48 @@ class Home extends React.Component {
 
   submitText() {
     if(this.state.input_item != '') {
-      this.props.addElement(this.state.input_item)
+      this.props.addItem(this.state.input_item)
     }
-    this.getData()
+    this.componentDidMount()
+  }
+
+  deleteList() {
+    if(this.state.items_loaded.length != 0) {
+      this.props.delete()
+    }
+    this.componentDidMount()
   }
 
   render() {
     return (
       <View style={styles.container}>
-        <TextInput
-          style={styles.textinput}
-          placeholder='Entrez du text'
-          onChangeText={(text) => this.searchTextInputChanged(text)}
-          onSubmitEditing={() => this.submitText()}
-        />
-        <Button
-          onPress={() => this.submitText()}
-          title="Ajouter"
-          color="#841584"
-        />
+        <View style={styles.input_container}>
+          <TextInput
+            style={styles.textinput}
+            placeholder='Entrez du text'
+            onChangeText={(text) => this.searchTextInputChanged(text)}
+            onSubmitEditing={() => this.submitText()}
+          />
+          <Button
+            onPress={() => this.submitText()}
+            style={styles.btn}
+            title="Ajouter"
+            color="#841584"
+          />
+        </View>
 
         <FlatList
-          data={this.state.items}
-          keyExtractor={(item) => item + Math.floor(Math.random() * Math.floor(100))}
+          data={this.state.items_loaded}
+          keyExtractor={(item) => item + Math.floor(Math.random() * Math.floor(10000))}
           renderItem={({item}) => (
             <Text style={styles.item}>{item}</Text>
           )}
+        />
+
+        <Button
+          onPress={() => this.deleteList()}
+          title="Tout supprimer"
+          color="#841584"
         />
       </View>
     )
@@ -73,7 +86,14 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 50
   },
+  input_container: {
+    flexDirection: 'row'
+  },
+  btn: {
+    flex: 1
+  },
   textinput: {
+    flex: 1,
     borderColor: 'grey',
     borderWidth: 2,
     paddingLeft: 5,
@@ -89,13 +109,14 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => {
   return {
-    items: state.items
+    items: state.items_loaded
   }
 }
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = dispatch => {
   return {
-    addElement: (item) => dispatch(addElement(item))
+    addItem: (item) => dispatch(addElement(item)),
+    delete: () => dispatch(deleteAll())
   }
 }
 
