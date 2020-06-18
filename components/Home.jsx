@@ -27,7 +27,7 @@ class Home extends Component {
     }
   }
 
-  searchTextInputChanged(text) {
+  handleChange(text) {
     this.state.input_item = text
   }
 
@@ -52,7 +52,7 @@ class Home extends Component {
           <TextInput
             style={styles.textinput}
             placeholder='Entrez du text'
-            onChangeText={(text) => this.searchTextInputChanged(text)}
+            onChangeText={(text) => this.handleChange(text)}
             onSubmitEditing={() => this.submitText()}
           />
           <Button

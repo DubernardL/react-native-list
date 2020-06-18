@@ -1,7 +1,7 @@
 export function addElement(item) {
   return {
     type: 'ADD_ELEMENT',
-    data: item
+    payload: item
   }
 }
 

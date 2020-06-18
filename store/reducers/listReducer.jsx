@@ -1,12 +1,10 @@
 import AsyncStorage from '@react-native-community/async-storage'
 
-const initialState = []
-
-function listReducer(state = initialState, action) {
+function listReducer(state = [], action) {
   let nextState
   switch(action.type) {
     case 'ADD_ELEMENT':
-      nextState = [...state, action.data]
+      nextState = [...state, action.payload]
       try {
         AsyncStorage.setItem('items', JSON.stringify(nextState))
       } catch (e) {
