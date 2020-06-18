@@ -1,5 +1,8 @@
 import React from 'react'
+import { connect } from 'react-redux'
 import { StyleSheet, Text, View, TextInput, FlatList, Button } from 'react-native'
+import AsyncStorage from '@react-native-community/async-storage'
+import { addElement } from '../actions/index'
 
 class Home extends React.Component {
 
@@ -7,7 +10,23 @@ class Home extends React.Component {
     super(props)
     this.state = {
       input_item: "",
-      items: ["léo", "Raph"]
+      items: []
+    }
+  }
+
+  componentDidMount() {
+    this.getData()
+    console.log('COMPONENT DID MOUNT')
+  }
+
+  async getData() {
+    try {
+      const jsonValue = await AsyncStorage.getItem('items')
+      this.setState({
+        items: JSON.parse(jsonValue)
+      })
+    } catch(e) {
+      console.log(e)
     }
   }
 
@@ -16,9 +35,10 @@ class Home extends React.Component {
   }
 
   submitText() {
-    this.setState({
-      items: [...[this.state.input_item], ...this.state.items]
-    })
+    if(this.state.input_item != '') {
+      this.props.addElement(this.state.input_item)
+    }
+    this.getData()
   }
 
   render() {
@@ -38,9 +58,9 @@ class Home extends React.Component {
 
         <FlatList
           data={this.state.items}
-          keyExtractor={(item) => item}
+          keyExtractor={(item) => item + Math.floor(Math.random() * Math.floor(100))}
           renderItem={({item}) => (
-            <Text>{item}</Text>
+            <Text style={styles.item}>{item}</Text>
           )}
         />
       </View>
@@ -59,9 +79,27 @@ const styles = StyleSheet.create({
     paddingLeft: 5,
     borderRadius: 5,
     marginRight: 5
+  },
+  item: {
+    borderBottomWidth: 1,
+    padding: 5,
+    borderColor: 'grey'
   }
 })
 
-export default Home
+const mapStateToProps = state => {
+  return {
+    items: state.items
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    addElement: (item) => dispatch(addElement(item))
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home)
+
 
 

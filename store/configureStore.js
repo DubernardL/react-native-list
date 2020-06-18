@@ -1,15 +1,8 @@
-import { createStore } from 'redux'
-import { AsyncStorage } from 'react-native'
+import { createStore, combineReducers } from 'redux'
+import listReducer from './reducers/listReducer'
 
-_storeData = async () => {
-  try {
-    await AsyncStorage.setItem(
-      '@MySuperStore:key',
-      'I like to save it.'
-    );
-  } catch (error) {
-    // Error saving data
-  }
-};
+const rootReducer = combineReducers({
+  items: listReducer
+})
 
-
+export default createStore(rootReducer)
